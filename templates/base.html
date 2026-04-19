@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}FYP Portal{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+</head>
+<body>
+
+<!-- Topbar -->
+<header class="topbar">
+  <button class="toggle-btn" onclick="toggleSidebar()" title="Toggle sidebar">&#9776;</button>
+  <a class="brand" href="{% url 'dashboard:home' %}">FYP<span>Portal</span></a>
+  <div class="spacer"></div>
+  {% if user.is_authenticated %}
+    <span class="user-info">{{ user.username }} ({{ user.role }})</span>
+    <a href="{% url 'accounts:logout' %}" class="btn-logout">Logout</a>
+  {% endif %}
+</header>
+
+<!-- Sidebar -->
+{% if user.is_authenticated %}
+<nav class="sidebar" id="sidebar">
+  {% if user.role == 'student' %}
+    <div class="nav-section">Main</div>
+    <a href="{% url 'dashboard:student_home' %}" class="{% if request.resolver_match.url_name == 'student_home' %}active{% endif %}">
+      <span class="icon">&#127968;</span> Dashboard
+    </a>
+    <div class="nav-section">Posts</div>
+    <a href="{% url 'dashboard:create_post' %}" class="{% if request.resolver_match.url_name == 'create_post' %}active{% endif %}">
+      <span class="icon">&#43;</span> New Post
+    </a>
+  {% elif user.role == 'admin' %}
+    <div class="nav-section">Admin</div>
+    <a href="{% url 'dashboard:admin_home' %}" class="{% if request.resolver_match.url_name == 'admin_home' %}active{% endif %}">
+      <span class="icon">&#9881;</span> Admin Home
+    </a>
+    <a href="/admin/">
+      <span class="icon">&#128736;</span> Django Admin
+    </a>
+  {% endif %}
+</nav>
+{% endif %}
+
+<!-- Main content -->
+<main class="main-content" id="main-content">
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+  {% block content %}{% endblock %}
+</main>
+
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const main = document.getElementById('main-content');
+    if (sidebar) {
+      sidebar.classList.toggle('collapsed');
+      main.classList.toggle('expanded');
+    }
+  }
+</script>
+</body>
+</html>

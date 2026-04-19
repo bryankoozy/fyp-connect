@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Register — FYP Portal</title>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+</head>
+<body>
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">FYP<span>Portal</span></div>
+
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="johndoe" required/>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="you@university.edu" required/>
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <select name="role">
+          <option value="student">Student</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Student ID (optional)</label>
+        <input type="text" name="student_id" placeholder="e.g. S10012345"/>
+      </div>
+      <div class="form-group">
+        <label>Course (optional)</label>
+        <input type="text" name="course" placeholder="e.g. Computer Science"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password1" placeholder="••••••••" required/>
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" name="password2" placeholder="••••••••" required/>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px;">
+        Register
+      </button>
+    </form>
+    <div class="auth-footer">
+      Already have an account? <a href="{% url 'accounts:login' %}">Login</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+# Virtual environment
+venv/
+
+# Database (never commit this)
+db.sqlite3
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Django stuff
+*.log
+local_settings.py
+media/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables (if you later use a .env file)
+.env

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}New Post — FYP Portal{% endblock %}
+{% block content %}
+
+<div class="page-heading">Create FYP Request</div>
+<p class="page-subheading">Post a request to find teammates for your final year project.</p>
+
+<div class="card" style="max-width:600px;">
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-group">
+        <label>{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+          <p style="color:#c0392b;font-size:0.8rem;margin-top:4px;">{{ field.errors.0 }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <div style="margin-top:8px;display:flex;gap:10px;">
+      <button type="submit" class="btn btn-primary">Submit Post</button>
+      <a href="{% url 'dashboard:student_home' %}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}
