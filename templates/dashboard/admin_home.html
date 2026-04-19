@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — FYP Portal{% endblock %}
+{% block content %}
+
+<div class="page-heading">FYP Team Finder</div>
+<p class="page-subheading">Browse open requests from other students looking for project members.</p>
+
+<div style="margin-bottom:20px;">
+  <a href="{% url 'dashboard:create_post' %}" class="btn btn-primary">+ Post a Request</a>
+</div>
+
+<!-- Other students' posts -->
+<h2 style="font-size:1rem;font-weight:600;color:#1b3a5c;margin-bottom:12px;">
+  Open Requests ({{ posts.count }})
+</h2>
+
+{% if posts %}
+  {% for post in posts %}
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="card-title">{{ post.title }}</div>
+        <span class="badge badge-{{ post.status }}">{{ post.status|capfirst }}</span>
+      </div>
+      <div class="card-meta">
+        Posted by {{ post.author.username }}
+        &nbsp;·&nbsp; {{ post.created_at|date:"d M Y" }}
+        &nbsp;·&nbsp; {{ post.members_needed }} member{{ post.members_needed|pluralize }} needed
+      </div>
+      <div class="card-body">
+        <p>{{ post.description }}</p>
+        {% if post.skills_needed %}
+          <p style="margin-top:8px;font-size:0.82rem;color:#6b7280;">
+            <strong>Skills:</strong> {{ post.skills_needed }}
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="card" style="text-align:center;color:#6b7280;">
+    No open requests right now. Be the first to post!
+  </div>
+{% endif %}
+
+<!-- My posts -->
+{% if my_posts %}
+  <h2 style="font-size:1rem;font-weight:600;color:#1b3a5c;margin:28px 0 12px;">
+    My Posts ({{ my_posts.count }})
+  </h2>
+  {% for post in my_posts %}
+    <div class="card" style="border-left:4px solid #2e6da4;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="card-title">{{ post.title }}</div>
+        <span class="badge badge-{{ post.status }}">{{ post.status|capfirst }}</span>
+      </div>
+      <div class="card-meta">{{ post.created_at|date:"d M Y" }}</div>
+      <div class="card-body">{{ post.description }}</div>
+      <div style="margin-top:12px;">
+        <form method="post" action="{% url 'dashboard:delete_post' post.pk %}"
+              onsubmit="return confirm('Delete this post?');" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger" style="font-size:0.8rem;padding:5px 12px;">
+            Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  {% endfor %}
+{% endif %}
+
+{% endblock %}
