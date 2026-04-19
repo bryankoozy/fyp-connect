@@ -125,8 +125,6 @@ def verify_otp_view(request):
 
                 messages.success(request, f'Welcome, {user.username}!')
 
-                if user.role == 'admin':
-                    return redirect('portal:home')
                 return redirect('dashboard:home')
             else:
                 messages.error(request, 'Invalid or expired OTP. Try again.')
