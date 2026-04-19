@@ -3,13 +3,12 @@
 {% block content %}
 
 <div class="page-heading">FYP Team Finder</div>
-<p class="page-subheading">Browse open requests from other students looking for project members.</p>
+<p class="page-subheading">Browse open requests from students looking for project members.</p>
 
 <div style="margin-bottom:20px;">
   <a href="{% url 'dashboard:create_post' %}" class="btn btn-primary">+ Post a Request</a>
 </div>
 
-<!-- Other students' posts -->
 <h2 style="font-size:1rem;font-weight:600;color:#1b3a5c;margin-bottom:12px;">
   Open Requests ({{ posts.count }})
 </h2>
@@ -42,7 +41,6 @@
   </div>
 {% endif %}
 
-<!-- My posts -->
 {% if my_posts %}
   <h2 style="font-size:1rem;font-weight:600;color:#1b3a5c;margin:28px 0 12px;">
     My Posts ({{ my_posts.count }})
