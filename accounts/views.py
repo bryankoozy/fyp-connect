@@ -12,10 +12,10 @@ def register_view(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = False  # inactive until OTP verified
+            user.is_active = False
+            user.is_verified = False
             user.save()
 
-            # Generate OTP
             code = OTP.generate_code()
             OTP.objects.create(user=user, code=code, purpose='register')
 
@@ -26,12 +26,12 @@ def register_view(request):
                 recipient_list=[user.email],
             )
 
-            # SESSION SAFE SET
             request.session['pending_user_id'] = user.id
             request.session['otp_purpose'] = 'register'
 
-            messages.info(request, 'An OTP has been sent to your email.')
+            messages.info(request, 'An OTP has been sent to your email. Check your terminal in dev mode.')
             return redirect('accounts:verify_otp')
+        # if form is invalid, fall through and re-render with errors shown
     else:
         form = RegisterForm()
 
@@ -45,10 +45,20 @@ def login_view(request):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
 
+            try:
+                user_obj = CustomUser.objects.get(email=email)
+            except CustomUser.DoesNotExist:
+                messages.error(request, 'Invalid email or password.')
+                return render(request, 'accounts/login.html', {'form': form})
+
+            # check if user was registered but never verified OTP
+            if not user_obj.is_active:
+                messages.error(request, 'Account not activated. Please complete OTP verification.')
+                return render(request, 'accounts/login.html', {'form': form})
+
             user = authenticate(request, username=email, password=password)
 
             if user:
-                # Generate OTP
                 code = OTP.generate_code()
                 OTP.objects.create(user=user, code=code, purpose='login')
 
@@ -59,11 +69,10 @@ def login_view(request):
                     recipient_list=[user.email],
                 )
 
-                # SESSION SAFE SET
                 request.session['pending_user_id'] = user.id
                 request.session['otp_purpose'] = 'login'
 
-                messages.info(request, 'An OTP has been sent to your email.')
+                messages.info(request, 'OTP sent to your email.')
                 return redirect('accounts:verify_otp')
             else:
                 messages.error(request, 'Invalid email or password.')
@@ -77,16 +86,14 @@ def verify_otp_view(request):
     user_id = request.session.get('pending_user_id')
     purpose = request.session.get('otp_purpose')
 
-    # SAFE CHECK (prevents crash)
     if not user_id or not purpose:
-        messages.error(request, "Session expired. Please login again.")
+        messages.error(request, 'Session expired. Please login again.')
         return redirect('accounts:login')
 
-    # SAFE USER FETCH
     try:
         user = CustomUser.objects.get(pk=user_id)
     except CustomUser.DoesNotExist:
-        messages.error(request, "User not found. Please login again.")
+        messages.error(request, 'User not found. Please login again.')
         return redirect('accounts:login')
 
     if request.method == 'POST':
@@ -111,20 +118,22 @@ def verify_otp_view(request):
                     user.is_verified = True
                     user.save()
 
-                login(request, user)
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
 
-                # SAFE SESSION CLEANUP (no KeyError)
                 request.session.pop('pending_user_id', None)
                 request.session.pop('otp_purpose', None)
 
                 messages.success(request, f'Welcome, {user.username}!')
+
+                if user.role == 'admin':
+                    return redirect('portal:home')
                 return redirect('dashboard:home')
             else:
-                messages.error(request, 'Invalid or expired OTP.')
+                messages.error(request, 'Invalid or expired OTP. Try again.')
     else:
         form = OTPForm()
 
-    return render(request, 'accounts/verify_otp.html', {'form': form})
+    return render(request, 'accounts/verify_otp.html', {'form': form, 'email': user.email})
 
 
 def logout_view(request):
